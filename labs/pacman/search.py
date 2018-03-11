@@ -78,7 +78,7 @@ class Node:
         self.action = action
         self.cost = cost
         self.parent = parent
-    def path_cost(self):
+        
 
 def get_actions(node):
     actions = []
@@ -106,26 +106,24 @@ def graph_search(problem, frontier):
         explored.add(node.state)
     return None
 
-def best_fit_graph_search(problem, f):
-    node = Node(problem.initial)
-    frontier = util.PriorityQueueWithFunction(f)
-    frontier.update(node)
+def best_fit_graph_search(problem):
+    n = problem.getStartState()
+    root = Node(n, [], 0, 0)
+    frontier = util.PriorityQueue()
+    frontier.push(root, 0)
     explored = set()
     while frontier:
         node = frontier.pop()
-        
+        actions = get_actions(node)
         if problem.isGoalState(node.state):
-            return get_actions(node)
+            return actions
         
-        explored.add(node)
         for c in problem.getSuccessors(node.state):
-            child = Node(c[0], c[1], c[2], node)
-            if child not in frontier and child.state not in explores:
-                frontier.push(child)
-            else child in frontier:
-                #incumbent = child.pop()
-                #if f(child) < f(incumbent):
-                frontier.update(child, f(child))
+            child = Node(c[0], c[1], problem.getCostOfActions(actions), node)
+            if child.state not in explored:
+                frontier.update(child, child.cost)
+        
+        explored.add(node.state)
     return None
 
 def depthFirstSearch(problem):
@@ -155,7 +153,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    return best_fit_graph_search(problem,lambda node: node.path_cost)
+    return best_fit_graph_search(problem)
 
 def nullHeuristic(state, problem=None):
     """
@@ -167,8 +165,22 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    explored = set()
 
+    node = Node(problem.getStartState(), [], 0, None)
+    frontier.push(node, 0)
+    while frontier:
+        node = frontier.pop()
+        actions = node.action
+        if problem.isGoalState(node.state):
+            return actions
+        for c in problem.getSuccessors(node.state):
+            if c[0] not in explored:
+                child = Node(c[0], actions + [c[1]], c[2], node)
+                frontier.update(child, child.cost + heuristic(child.state, problem))
+        explored.add(node.state)
+    return None
 
 # Abbreviations
 bfs = breadthFirstSearch
