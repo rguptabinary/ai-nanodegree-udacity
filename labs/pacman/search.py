@@ -78,6 +78,7 @@ class Node:
         self.action = action
         self.cost = cost
         self.parent = parent
+    def path_cost(self):
 
 def get_actions(node):
     actions = []
@@ -112,7 +113,20 @@ def best_fit_graph_search(problem, f):
     explored = set()
     while frontier:
         node = frontier.pop()
-        if
+        
+        if problem.isGoalState(node.state):
+            return get_actions(node)
+        
+        explored.add(node)
+        for c in problem.getSuccessors(node.state):
+            child = Node(c[0], c[1], c[2], node)
+            if child not in frontier and child.state not in explores:
+                frontier.push(child)
+            else child in frontier:
+                #incumbent = child.pop()
+                #if f(child) < f(incumbent):
+                frontier.update(child, f(child))
+    return None
 
 def depthFirstSearch(problem):
     """
@@ -141,7 +155,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return best_fit_graph_search(problem,lambda node: node.path_cost)
 
 def nullHeuristic(state, problem=None):
     """
